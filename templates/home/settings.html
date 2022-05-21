@@ -1,0 +1,1313 @@
+{% extends 'layouts/base.html' %}
+
+{% block title %} 设置 {% endblock title %}
+
+{% block content %}
+
+    <div class="header bg-primary pb-6">
+        <div class="container-fluid">
+            <div class="header-body">
+                <div class="row align-items-center py-4">
+                    <div class="col-lg-6 col-7">
+                        <h6 class="h2 text-white d-inline-block mb-0">设置中心</h6>
+                        <nav aria-label="breadcrumb" class="d-none d-md-inline-block ml-md-4">
+                            <ol class="breadcrumb breadcrumb-links breadcrumb-dark">
+                                <li class="breadcrumb-item"><a href="/"><i class="fas fa-home"></i></a>
+                                </li>
+                                <li class="breadcrumb-item active">设置</li>
+                            </ol>
+                        </nav>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Page content -->
+    <div class="container-fluid mt--6">
+        <div class="row">
+            <div class="col">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="row align-items-center">
+                            <div class="col-8">
+                                <h3 class="mb-0">修改配置</h3>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="pl-lg-4">
+                                <input type="button" class="btn btn-primary" value="一键设置WEBHOOK"
+                                       onclick="query_webhook()">
+                            </div>
+                            <div class="pl-lg-4">
+                                <a class="btn btn-danger" href="/advanced.html">高级设置</a>
+                            </div>
+                            <div class="pl-lg-4">
+                                <input type="button" class="btn btn-warning" value="清除缓存"
+                                       onclick="query_purge()">
+                            </div>
+                            {% if showUpdate %}
+                                <div class="pl-lg-4">
+                                    <input type="button" class="btn btn-danger" value="一键更新"
+                                           onclick="query_update()">
+                                </div>
+                            {% endif %}
+                        </div>
+                        <form id="apikey-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">API配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">API密钥</label>
+                                            <input type="text" name="apikey" class="form-control"
+                                                   placeholder="留空将保持不变">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">启用友链申请API</label>
+                                            <select name="allow_friend" class="form-control">
+                                                <option{% if ALLOW_FRIEND == "是" %}
+                                                    selected{% endif %}>是
+                                                </option>
+                                                <option{% if ALLOW_FRIEND != "是" %}
+                                                    selected{% endif %}>否
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_api()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="statistic-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">统计配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">启用统计API</label>
+                                            <select name="allow_statistic" class="form-control">
+                                                <option{% if STATISTIC_ALLOW == "是" %}
+                                                    selected{% endif %}>是
+                                                </option>
+                                                <option{% if STATISTIC_ALLOW != "是" %}
+                                                    selected{% endif %}>否
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">统计安全域名</label>
+                                            <input type="text" name="statistic_domains"
+                                                   class="form-control"
+                                                   placeholder="输入域名包含的关键字, 英文半角逗号间隔"
+                                                   value="{{ STATISTIC_DOMAINS }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_statistic()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="user-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">用户配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">原密码</label>
+                                            <input type="text" name="password" class="form-control"
+                                                   placeholder="原密码">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">新用户名</label>
+                                            <input type="text" name="username" class="form-control"
+                                                   placeholder="新的用户名">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">新密码</label>
+                                            <input type="text" name="newpassword"
+                                                   class="form-control"
+                                                   placeholder="新的密码">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">重复密码</label>
+                                            <input type="text" name="repassword"
+                                                   class="form-control"
+                                                   placeholder="再次输入以确认密码">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_user_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="github-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">Github配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">Github仓库</label>
+                                            <input type="text" name="repo" class="form-control"
+                                                   placeholder="username/repo"
+                                                   value="{{ GH_REPO }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">项目分支</label>
+                                            <input type="text" name="branch" class="form-control"
+                                                   placeholder="main"
+                                                   value="{{ GH_REPO_BRANCH }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">Github密钥</label>
+                                            <input type="text" name="token" class="form-control"
+                                                   placeholder="{{ GH_TOKEN }}" value="">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">仓库路径</label>
+                                            <input type="text" name="path" class="form-control"
+                                                   placeholder="若为根目录请留空"
+                                                   value="{{ GH_REPO_PATH }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_github_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="notify-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">消息配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-12">
+                                        <div class="form-group">
+                                            <label class="form-control-label">OnePush</label>
+                                            <input type="text" name="onepush" class="form-control"
+                                                   placeholder="配置见 Wiki" value="{{ ONEPUSH }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="set_onepush()">
+                                        <input type="button" class="btn btn-info" value="测试"
+                                               onclick="test_onepush()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="abbrlink-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">短链接配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">短链接算法</label>
+                                            <select name="alg" class="form-control">
+                                                <option{% if ABBRLINK_ALG == "crc16" %}
+                                                    selected{% endif %}>crc16
+                                                </option>
+                                                <option{% if ABBRLINK_ALG == "crc32" %}
+                                                    selected{% endif %}>crc32
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">短链接进制</label>
+                                            <select name="rep" class="form-control">
+                                                <option{% if ABBRLINK_REP == "hex" %}
+                                                    selected{% endif %}>hex
+                                                </option>
+                                                <option{% if ABBRLINK_REP == "dec" %}
+                                                    selected{% endif %}>dec
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_abbrlink_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="image-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">图床配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床类型</label>
+                                            <select name="imageType" id="imageType"
+                                                    class="form-control"
+                                                    onchange="change_image_type(this.value)">
+                                                <option value=""
+                                                        {% if IMG_TYPE == "" %}selected{% endif %}>
+                                                    关闭
+                                                </option>
+                                                <option value="custom"
+                                                        {% if IMG_TYPE == "custom" %} selected
+                                                        {% endif %}>远程API
+                                                </option>
+                                                <option value="s3"
+                                                        {% if IMG_TYPE == "s3" %}selected{% endif %}>
+                                                    S3协议
+                                                </option>
+                                                <option value="ftp"
+                                                        {% if IMG_TYPE == "ftp" %}selected{% endif %}>
+                                                    FTP
+                                                </option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="image-form"></div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_image_config()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                        <form id="cust-settings" onsubmit="javascript: return false;">
+                            <hr class="my-4"/>
+                            <h6 class="heading-small text-muted mb-4">自定义配置</h6>
+                            <div class="pl-lg-4">
+                                <div class="row">
+                                    {% csrf_token %}
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点名称</label>
+                                            <input type="text" name="name" class="form-control"
+                                                   placeholder="默认为 Hexo管理面板"
+                                                   value="{{ QEXO_NAME }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点连接符</label>
+                                            <input type="text" name="split" class="form-control"
+                                                   placeholder="默认为“ - ”"
+                                                   value="{{ QEXO_SPLIT }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点LOGO</label>
+                                            <input type="text" name="logo"
+                                                   class="form-control"
+                                                   placeholder="默认为 brand 下的 Qexo.png"
+                                                   value="{{ QEXO_LOGO }}">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">站点ICON</label>
+                                            <input type="text" name="icon"
+                                                   class="form-control"
+                                                   placeholder="默认为 brand 下的 favicon.ico"
+                                                   value="{{ QEXO_ICON }}">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <input type="button" class="btn btn-primary" value="提交"
+                                               onclick="submit_cust_config()">
+                                        <input type="button" class="btn btn-white" value="重置"
+                                               onclick="query_reset_cust()">
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="queryModal" tabindex="-1" aria-labelledby="queryModalLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryModalLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <a id="question"></a>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="purge()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="queryWebhook" tabindex="-1" aria-labelledby="queryWebhookLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryWebhookLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        确定要自动创建Webhook事件吗？这会清除您原仓库的所有Webhook事件
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="create_webhook()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="queryUpdate" tabindex="-1" aria-labelledby="queryUpdateLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryWebhookLabel">更新</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="col">
+                            <label class="form-control-label">更新通道</label>
+                            <select class="form-control" id="update-origin-branch">
+                                <option>master</option>
+                                <option>dev</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="do_update()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="queryResetCust" tabindex="-1"
+             aria-labelledby="queryResetCustLabel"
+             aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="queryResetCustLabel">提示</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        确定要重置自定义配置吗？该操作不可回退
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">取消
+                        </button>
+                        <button type="button" class="btn btn-primary" data-dismiss="modal"
+                                onclick="reset_cust_config()">确定
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% include "includes/footer.html" %}
+
+    </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE -->
+{% block javascripts %}
+
+    <script>
+
+        function getBaseUrl() {
+            let ishttps = 'https:' == document.location.protocol ? true : false;
+            let url = window.location.host;
+            if (ishttps) {
+                url = 'https://' + url;
+            } else {
+                url = 'http://' + url;
+            }
+            return url;
+        }
+
+        function KZ_Loading(config) {
+            if (this instanceof KZ_Loading) {
+                const domTemplate = '<div class="modal kz-loading" data-kzid="@@KZ_Loadin_ID@@" backdrop="static" keyboard="false"><div style="width: 200px;height:20px; z-index: 20000; position: absolute; text-align: center; left: 50%; top: 50%;margin-left:-100px;margin-top:-10px"><div class="progress progress-striped active" style="margin-bottom: 0;"><div class="progress-bar" style="width: 100%;"></div></div><h5>@@KZ_Loading_Text@@</h5></div></div>';
+                this.config = {
+                    content: 'loading...',
+                    time: 0,
+                };
+                if (config != null) {
+                    if (typeof config === 'string') {
+                        this.config = Object.assign(this.config, {
+                            content: config
+                        });
+                    } else if (typeof config === 'object') {
+                        this.config = Object.assign(this.config, config);
+                    }
+                }
+                this.id = new Date().getTime().toString();
+                this.state = 'hide';
+
+                /*显示 */
+                this.show = function () {
+                    $('.kz-loading[data-kzid=' + this.id + ']').modal({
+                        backdrop: 'static',
+                        keyboard: false
+                    });
+                    this.state = 'show';
+                    if (this.config.time > 0) {
+                        var that = this;
+                        setTimeout(function () {
+                            that.hide();
+                        }, this.config.time);
+                    }
+                };
+                /*隐藏 */
+                this.hide = function (callback) {
+                    $('.kz-loading[data-kzid=' + this.id + ']').modal('hide');
+                    this.state = 'hide';
+                    if (callback) {
+                        callback();
+                    }
+                };
+                /*销毁dom */
+                this.destroy = function () {
+                    var that = this;
+                    this.hide(function () {
+                        var node = $('.kz-loading[data-kzid=' + that.id + ']');
+                        node.next().remove();
+                        node.remove();
+                        that.show = function () {
+                            throw new Error('对象已销毁！');
+                        };
+                        that.hide = function () {
+                        };
+                        that.destroy = function () {
+                        };
+                    });
+                }
+
+                var domHtml = domTemplate.replace('@@KZ_Loadin_ID@@', this.id).replace('@@KZ_Loading_Text@@', this.config.content);
+                $('body').append(domHtml);
+            } else {
+                return new KZ_Loading(config);
+            }
+        }
+
+        function submit_github_config() {
+            var loading = new KZ_Loading('正在校验并保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_github/',
+                method: 'post',
+                data: $('#github-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_user_config() {
+            if (!$("input[name='username']").val()) {
+                notyf.error("请输入正确的用户名！");
+                return false;
+            }
+            if (!$("input[name='password']").val()) {
+                notyf.error("原密码不能为空！");
+                return false;
+            }
+            if (!$("input[name='newpassword']").val()) {
+                notyf.error("请输入正确的新密码！");
+                return false;
+            }
+            if ($("input[name='newpassword']").val() != $("input[name='repassword']").val()) {
+                notyf.error("两次输入的密码不相同！");
+                return false;
+            }
+            let loading = new KZ_Loading('正在校验并保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_user/',
+                method: 'post',
+                data: $('#user-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                        setTimeout(location.reload(), 1000);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_image_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_image_bed/',
+                method: 'post',
+                data: $('#image-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function query_purge() {
+            $("#question").text("确定清除所有缓存吗");
+            $("#queryModal").modal("show");
+        }
+
+        function query_webhook() {
+            $("#queryWebhook").modal("show");
+        }
+
+        function query_update() {
+            $("#queryUpdate").modal("show");
+        }
+
+        function query_reset_cust() {
+            $("#queryResetCust").modal("show");
+        }
+
+        function purge() {
+            let loading = new KZ_Loading('正在清除中...');
+            loading.show();
+            $.ajax({
+                url: '/api/purge/',
+                method: 'get',
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function create_webhook() {
+            let loading = new KZ_Loading('正在设置中...');
+            loading.show();
+            $.ajax({
+                url: '/api/create_webhook/',
+                method: 'post',
+                data: {
+                    "csrfmiddlewaretoken": "{{ csrf_token }}", "uri": getBaseUrl() + "/api/webhook/"
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+
+        function submit_cust_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_cust/',
+                method: 'post',
+                data: $('#cust-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function reset_cust_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_cust/',
+                method: 'post',
+                data: {
+                    csrfmiddlewaretoken: '{{ csrf_token }}', 'logo': 'https://cdn.jsdelivr' +
+                        '.net/npm/qexo-static@1.4.0/assets/img/brand/qexo.png', 'icon':
+                        'https://cdn.jsdelivr' +
+                        '.net/npm/qexo-static@1.4.0/assets/img/brand/favicon.ico',
+                    'name': 'Hexo管理面板', 'split': ' - '
+                },
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_api() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_api/',
+                method: 'post',
+                data: $('#apikey-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_statistic() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_statistic/',
+                method: 'post',
+                data: $('#statistic-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function set_onepush() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_onepush/',
+                method: 'post',
+                data: $('#notify-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function test_onepush() {
+            let loading = new KZ_Loading('正在请求中...');
+            loading.show();
+            $.ajax({
+                url: '/api/test_onepush/',
+                method: 'post',
+                data: $('#notify-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function submit_abbrlink_config() {
+            let loading = new KZ_Loading('正在保存中...');
+            loading.show();
+            $.ajax({
+                url: '/api/set_abbrlink/',
+                method: 'post',
+                data: $('#abbrlink-settings').serialize(),
+                dataType: "json",
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success(res.msg);
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        function do_update() {
+            let loading = new KZ_Loading('正在尝试更新...');
+            loading.show();
+            $.ajax({
+                url: '/api/do_update/',
+                method: 'post',
+                dataType: "json",
+                data: {
+                    "branch": $("#update-origin-branch").val(), csrfmiddlewaretoken:
+                        '{{ csrf_token }}'
+                },
+                success: function (res) {
+                    loading.destroy();
+                    if (res.status) {
+                        notyf.success("更新成功！请等待自动部署");
+                    } else {
+                        notyf.error(res.msg);
+                    }
+                },
+                error: function (res) {
+                    loading.destroy();
+                    notyf.error("网络错误！");
+                }
+            })
+        }
+
+        var IMG_API = '{{ IMG_API }}';
+        var IMG_POST = '{{ IMG_POST }}';
+        var IMG_JSON_PATH = '{{ IMG_JSON_PATH }}';
+        var IMG_CUSTOM_HEADER = '{{ IMG_CUSTOM_HEADER }}';
+        var IMG_CUSTOM_BODY = '{{ IMG_CUSTOM_BODY }}';
+        var IMG_CUSTOM_URL = '{{ IMG_CUSTOM_URL }}';
+
+        var S3_KEY_ID = '{{ S3_KEY_ID }}';
+        var S3_ACCESS_KEY = '{{ S3_ACCESS_KEY }}';
+        var S3_BUCKET = '{{ S3_BUCKET }}';
+        var S3_ENDPOINT = '{{ S3_ENDPOINT }}';
+        var S3_PATH = '{{ S3_PATH }}';
+        var S3_PREV_URL = '{{ S3_PREV_URL }}';
+
+        var FTP_HOST = '{{ FTP_HOST }}';
+        var FTP_PORT = '{{ FTP_PORT }}';
+        var FTP_USER = '{{ FTP_USER }}';
+        var FTP_PASS = '{{ FTP_PASS }}';
+        var FTP_PATH = '{{ FTP_PATH }}';
+        var FTP_PREV_URL = '{{ FTP_PREV_URL }}';
+
+        function save_image_settings_cache() {
+            let form = $('#image-settings').serializeArray();
+            for (let i = 0; i < form.length; i += 1) {
+                if (form[i]["name"] === 'api') IMG_API = form[i]["value"];
+                if (form[i]["name"] === 'post') IMG_POST = form[i]["value"];
+                if (form[i]["name"] === 'jsonpath') IMG_JSON_PATH = form[i]["value"];
+                if (form[i]["name"] === 'header') IMG_CUSTOM_HEADER = form[i]["value"];
+                if (form[i]["name"] === 'body') IMG_CUSTOM_BODY = form[i]["value"];
+                if (form[i]["name"] === 'custom') IMG_CUSTOM_URL = form[i]["value"];
+                if (form[i]["name"] === 'key-id') S3_KEY_ID = form[i]["value"];
+                if (form[i]["name"] === 'access-key') S3_ACCESS_KEY = form[i]["value"];
+                if (form[i]["name"] === 'bucket') S3_BUCKET = form[i]["value"];
+                if (form[i]["name"] === 'endpoint') S3_ENDPOINT = form[i]["value"];
+                if (form[i]["name"] === 'path') S3_PATH = form[i]["value"];
+                if (form[i]["name"] === 'url') S3_PREV_URL = form[i]["value"];
+            }
+        }
+
+        function change_image_type(t) {
+            save_image_settings_cache()
+            if (t === "custom") {
+                $("#image-form").html(`
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">API地址</label>
+                                            <input type="text" name="api" class="form-control"
+                                                   placeholder="API 地址 ( 包含 http )"
+                                                   value="` + IMG_API + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">POST参数名</label>
+                                            <input type="text" name="post" class="form-control"
+                                                   placeholder="POST 参数名"
+                                                   value="` + IMG_POST + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">JSON路径</label>
+                                            <input type="text" name="jsonpath" class="form-control"
+                                                   placeholder="JSON 路径 eg: data.img"
+                                                   value="` + IMG_JSON_PATH + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义请求头</label>
+                                            <input type="text" name="header" class="form-control"
+                                                   placeholder="标准 JSON 格式"
+                                                   value='` + IMG_CUSTOM_HEADER + `'>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义BODY</label>
+                                            <input type="text" name="body" class="form-control"
+                                                   placeholder="标准 JSON 格式"
+                                                   value='` + IMG_CUSTOM_BODY + `'>
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义前缀</label>
+                                            <input type="text" name="custom" class="form-control"
+                                                   placeholder="自定义图片 URL 前缀"
+                                                   value="` + IMG_CUSTOM_URL + `">
+                                        </div>
+                                    </div>
+                                </div>`);
+            }
+            if (t === "s3") {
+                $("#image-form").html(`<div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">应用密钥ID</label>
+                                            <input type="text" name="key-id" class="form-control"
+                                                   placeholder="Access Key ID"
+                                                   value="` + S3_KEY_ID + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">应用密钥</label>
+                                            <input type="text" name="access-key"
+                                                   class="form-control"
+                                                   placeholder="Access Key"
+                                                   value="` + S3_ACCESS_KEY + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">储存桶</label>
+                                            <input type="text" name="bucket" class="form-control"
+                                                   placeholder="Bucket名称"
+                                                   value="` + S3_BUCKET + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">边缘节点</label>
+                                            <input type="text" name="endpoint" class="form-control"
+                                                   placeholder="eg: https://s3.us-west-002.example.com"
+                                                   value="` + S3_ENDPOINT + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">保存路径</label>
+                                            <input type="text" name="path" class="form-control"
+                                                   placeholder="eg: {year}/{month}/{md5}.{extName}"
+                                                   value="` + S3_PATH + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义域名</label>
+                                            <input type="text" name="url" class="form-control"
+                                                   placeholder="eg: https://example.com/dir"
+                                                   value="` + S3_PREV_URL + `">
+                                        </div>
+                                    </div>
+                                </div>`);
+            }
+            if (t === "ftp") {
+                $("#image-form").html(`<div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">FTP主机</label>
+                                            <input type="text" name="FTP_HOST" class="form-control"
+                                                   placeholder="连接的主机IP/域名"
+                                                   value="` + FTP_HOST + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">FTP端口</label>
+                                            <input type="text" name="FTP_PORT"
+                                                   class="form-control"
+                                                   placeholder="通常为21端口"
+                                                   value="` + FTP_PORT + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">用户名</label>
+                                            <input type="text" name="FTP_USER" class="form-control"
+                                                   placeholder="匿名登录请留空"
+                                                   value="` + FTP_USER + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">密码</label>
+                                            <input type="text" name="FTP_PASS" class="form-control"
+                                                   placeholder="无需密码请留空"
+                                                   value="` + FTP_PASS + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">保存路径</label>
+                                            <input type="text" name="FTP_PATH" class="form-control"
+                                                   placeholder="eg: {year}/{month}/{time}.{extName}"
+                                                   value="` + FTP_PATH + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义域名</label>
+                                            <input type="text" name="FTP_PREV_URL"
+                                            class="form-control"
+                                                   placeholder="eg: https://example.com/dir"
+                                                   value="` + FTP_PREV_URL + `">
+                                        </div>
+                                    </div>
+                                </div>`);
+            }
+            if (t === "") {
+                $("#image-form").html("");
+            }
+        }
+
+        if ('{{ IMG_TYPE }}' === "custom") {
+            $("#image-form").html(`
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床-API地址</label>
+                                            <input type="text" name="api" class="form-control"
+                                                   placeholder="API 地址 ( 包含 http )"
+                                                   value="` + IMG_API + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床-POST参数名</label>
+                                            <input type="text" name="post" class="form-control"
+                                                   placeholder="POST 参数名"
+                                                   value="` + IMG_POST + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床-JSON路径</label>
+                                            <input type="text" name="jsonpath" class="form-control"
+                                                   placeholder="JSON 路径 eg: data.img"
+                                                   value="` + IMG_JSON_PATH + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床-自定义请求头</label>
+                                            <input type="text" name="header" class="form-control"
+                                                   placeholder="标准 JSON 格式"
+                                                   value="` + IMG_CUSTOM_HEADER + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床-自定义BODY</label>
+                                            <input type="text" name="body" class="form-control"
+                                                   placeholder="标准 JSON 格式"
+                                                   value="` + IMG_CUSTOM_BODY + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">图床-自定义前缀</label>
+                                            <input type="text" name="custom" class="form-control"
+                                                   placeholder="自定义图片 URL 前缀"
+                                                   value="` + IMG_CUSTOM_URL + `">
+                                        </div>
+                                    </div>
+                                </div>`);
+        }
+        if ('{{ IMG_TYPE }}' === "s3") {
+            $("#image-form").html(`<div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">应用密钥ID</label>
+                                            <input type="text" name="key-id" class="form-control"
+                                                   placeholder="Access Key ID"
+                                                   value="` + S3_KEY_ID + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">应用密钥</label>
+                                            <input type="text" name="access-key"
+                                                   class="form-control"
+                                                   placeholder="Access Key"
+                                                   value="` + S3_ACCESS_KEY + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">储存桶</label>
+                                            <input type="text" name="bucket" class="form-control"
+                                                   placeholder="Bucket名称"
+                                                   value="` + S3_BUCKET + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">边缘节点</label>
+                                            <input type="text" name="endpoint" class="form-control"
+                                                   placeholder="eg: https://s3.us-west-002.example.com"
+                                                   value="` + S3_ENDPOINT + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">保存路径</label>
+                                            <input type="text" name="path" class="form-control"
+                                                   placeholder="eg: {year}/{month}/{md5}.{extName}"
+                                                   value="` + S3_PATH + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义域名</label>
+                                            <input type="text" name="url" class="form-control"
+                                                   placeholder="eg: https://example.com/dir"
+                                                   value="` + S3_PREV_URL + `">
+                                        </div>
+                                    </div>
+                                </div>`);
+        }
+        if ('{{ IMG_TYPE }}' === "ftp") {
+                $("#image-form").html(`<div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">FTP主机</label>
+                                            <input type="text" name="FTP_HOST" class="form-control"
+                                                   placeholder="连接的主机IP/域名"
+                                                   value="` + FTP_HOST + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">FTP端口</label>
+                                            <input type="text" name="FTP_PORT"
+                                                   class="form-control"
+                                                   placeholder="通常为21端口"
+                                                   value="` + FTP_PORT + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">用户名</label>
+                                            <input type="text" name="FTP_USER" class="form-control"
+                                                   placeholder="匿名登录请留空"
+                                                   value="` + FTP_USER + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">密码</label>
+                                            <input type="text" name="FTP_PASS" class="form-control"
+                                                   placeholder="无需密码请留空"
+                                                   value="` + FTP_PASS + `">
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">保存路径</label>
+                                            <input type="text" name="FTP_PATH" class="form-control"
+                                                   placeholder="eg: {year}/{month}/{time}.{extName}"
+                                                   value="` + FTP_PATH + `">
+                                        </div>
+                                    </div>
+                                    <div class="col-lg-6">
+                                        <div class="form-group">
+                                            <label class="form-control-label">自定义域名</label>
+                                            <input type="text" name="FTP_PREV_URL"
+                                            class="form-control"
+                                                   placeholder="eg: https://example.com/dir"
+                                                   value="` + FTP_PREV_URL + `">
+                                        </div>
+                                    </div>
+                                </div>`);
+            }
+        if ('{{ IMG_TYPE }}' === "") {
+            $("#image-form").html("");
+        }
+
+    </script>
+{% endblock javascripts %}
